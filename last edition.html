@@ -1,0 +1,878 @@
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content='{"version":"next","imageUrl":"https://incomecrypto.space/189715.png","button":{"title":"Open App","action":{"type":"launch_frame","name":"IncomeCrypto","url":"https://incomecrypto.space","splashImageUrl":"https://incomecrypto.space/189715.png","splashBackgroundColor":"#ffffff"}}}' name="fc:frame"/>
+<meta content="Open App" property="fc:frame:button:1"/>
+<meta content="https://incomecrypto.space/" property="fc:frame:post_url"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>Mini Apps Farcaster - Calendar &amp; Statistics</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="/189715.png" rel="icon" type="image/x-icon"/>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
+<style>
+    @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap");
+    body {
+      font-family: "Inter", sans-serif;
+    }
+    #calendar-scroll::-webkit-scrollbar {
+      display: none;
+    }
+    #calendar-scroll {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    /* Highlight current month in year view */
+    .current-month {
+      border: 2px solid #00c48c;
+      border-radius: 0.5rem;
+      padding: 0.25rem;
+    }
+  </style>
+</link></head>
+<body class="bg-[#1c1c1e] text-white min-h-screen flex flex-col">
+  <div class="flex flex-col flex-1 max-w-md mx-auto w-full pb-24">
+
+    <!-- Toggle Month/Year -->
+    <div class="flex rounded-full bg-[#2c2c2e] w-full max-w-[280px] mx-auto my-6 select-none" id="toggle-container">
+      <button class="flex-1 py-2 text-sm font-normal text-white/70 rounded-full" id="toggle-month" type="button">
+        Month
+      </button>
+      <button class="flex-1 py-2 text-sm font-semibold text-white bg-[#00c48c] rounded-full" id="toggle-year" type="button">
+        Year
+      </button>
+    </div>
+
+    <!-- Title -->
+    <h2 class="text-center font-extrabold text-white text-lg mb-6 select-none" id="calendar-title">
+      2025
+    </h2>
+
+    <!-- Calendar container with scroll -->
+    <div class="overflow-y-auto px-5 flex-1" id="calendar-scroll" style="max-height: calc(100vh - 220px);">
+
+      <!-- Year calendar grid -->
+      <div class="grid grid-cols-3 gap-x-6 gap-y-4 text-[11px] font-normal select-none" id="calendar-year">
+        <!-- Months will be dynamically generated here -->
+      </div>
+
+      <!-- Month calendar container -->
+      <div class="hidden flex flex-col gap-6 select-none" id="calendar-month">
+        <!-- Months will be dynamically generated here -->
+      </div>
+    </div>
+
+    <!-- Statistics content -->
+ <!-- Statistics content -->
+<div class="px-5 flex flex-col space-y-6 max-w-md mx-auto w-full hidden" id="statistics-content">
+  <div>
+    <h3 class="text-white font-semibold mb-2 text-lg select-none">
+      Income per Month
+    </h3>
+    <ul class="text-white text-sm space-y-1" id="income-per-month"></ul>
+  </div>
+  <div>
+    <h3 class="text-white font-semibold mb-2 text-lg select-none">
+      Income per Year
+    </h3>
+    <p class="text-white text-sm" id="income-per-year"></p>
+  </div>
+</div>
+
+<!-- ✅ Coach content — тепер усередині основного блоку -->
+<div class="px-5 flex flex-col space-y-6 max-w-md mx-auto w-full hidden" id="coach-content">
+  <div class="text-white/90 text-center text-base leading-relaxed px-2" id="coach-quote">
+    All my wins belong to God, all my losses are mine.
+  </div>
+  <!-- Coach NFT Rewards -->
+<div class="flex flex-col gap-4 text-center mt-4">
+  <button id="mint-day" class="bg-[#00c48c] text-white rounded-md py-2 px-4 disabled:opacity-50">
+    Mint "1 Day Profit" NFT
+  </button>
+  <button id="mint-week" class="bg-[#00c48c] text-white rounded-md py-2 px-4 disabled:opacity-50">
+    Mint "1 Week Profit" NFT
+  </button>
+  <button id="mint-month" class="bg-[#00c48c] text-white rounded-md py-2 px-4 disabled:opacity-50">
+    Mint "1 Month Profit" NFT
+  </button>
+  <button id="mint-year" class="bg-[#00c48c] text-white rounded-md py-2 px-4 disabled:opacity-50">
+    Mint "1 Year Profit" NFT
+  </button>
+</div>
+
+</div>
+
+</div> <!-- ✅ закриває .flex-1 головний контейнер -->
+
+
+  <!-- Bottom navigation -->
+  <nav class="fixed bottom-0 left-0 w-full bg-[#2c2c2e] border-t border-[#3a3a3c] flex justify-around items-center py-3 max-w-md mx-auto">
+    <button aria-label="Calendar tab" class="flex flex-col items-center text-[#00c48c] text-[11px] font-normal space-y-1 select-none" id="tab-calendar" type="button">
+      <i class="fas fa-calendar-alt text-2xl"></i>
+      <span>Calendar</span>
+    </button>
+    <button aria-label="Statistic tab" class="flex flex-col items-center text-white/50 text-[11px] font-normal space-y-1 select-none" id="tab-statistic" type="button">
+      <i class="fas fa-tachometer-alt text-2xl"></i>
+      <span>Statistic</span>
+    </button>
+    <button aria-label="Coach tab" class="flex flex-col items-center text-white/70 text-[11px] font-normal space-y-1 select-none" id="tab-coach" type="button">
+      <img alt="Coach avatar icon with glasses and beard" class="w-7 h-7 rounded-full" height="28" src="https://storage.googleapis.com/a1aa/image/e27b85bd-4b26-40d1-d338-985ad553e2d9.jpg" width="28"/>
+      <span>Coach</span>
+    </button>
+  </nav>
+
+  <!-- Modal for entering earnings/loss -->
+  <div class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 hidden" id="entry-modal">
+    <div aria-labelledby="modal-title" aria-modal="true" class="bg-[#2c2c2e] rounded-xl p-6 w-11/12 max-w-sm text-white flex flex-col space-y-4" role="dialog">
+      <h3 class="text-lg font-semibold text-center" id="modal-title">
+        Enter earnings/loss for <span id="modal-date"></span>
+      </h3>
+      <input autofocus="" class="bg-[#1c1c1e] rounded-md p-2 text-white text-center text-lg focus:outline-none" id="entry-input" placeholder="Enter amount (positive or negative)" step="0.01" type="number"/>
+      <div class="flex justify-end space-x-3">
+        <button class="px-4 py-2 rounded-md bg-gray-600 hover:bg-gray-700" id="modal-cancel" type="button">
+          Cancel
+        </button>
+        <button class="px-4 py-2 rounded-md bg-[#00c48c] hover:bg-[#00b47a]" id="modal-save" type="button">
+          Save
+        </button>
+      </div>
+    </div>
+  </div>
+</body>
+
+<script>
+    // Earnings data keyed by date string "YYYY-MM-DD"
+    const earningsData = window.earningsData;
+
+
+    // Elements
+    const calendarYearEl = document.getElementById("calendar-year");
+    const calendarMonthEl = document.getElementById("calendar-month");
+    const calendarTitleEl = document.getElementById("calendar-title");
+    const toggleMonthBtn = document.getElementById("toggle-month");
+    const toggleYearBtn = document.getElementById("toggle-year");
+    const toggleContainer = document.getElementById("toggle-container");
+    const entryModal = document.getElementById("entry-modal");
+    const modalDateEl = document.getElementById("modal-date");
+    const entryInput = document.getElementById("entry-input");
+    const modalCancelBtn = document.getElementById("modal-cancel");
+    const modalSaveBtn = document.getElementById("modal-save");
+    const tabCalendarBtn = document.getElementById("tab-calendar");
+    const tabStatisticBtn = document.getElementById("tab-statistic");
+    const tabCoachBtn = document.getElementById("tab-coach");
+    const calendarScroll = document.getElementById("calendar-scroll");
+    const statisticsContent = document.getElementById("statistics-content");
+    const incomePerMonthEl = document.getElementById("income-per-month");
+    const incomePerYearEl = document.getElementById("income-per-year");
+
+    // Month data for 2025 with start weekday (0=Sun)
+    const months = [
+      { name: "January", days: 31, startWeekday: 3 },
+      { name: "February", days: 28, startWeekday: 6 },
+      { name: "March", days: 31, startWeekday: 6 },
+      { name: "April", days: 30, startWeekday: 2 },
+      { name: "May", days: 31, startWeekday: 4 },
+      { name: "June", days: 30, startWeekday: 0 },
+      { name: "July", days: 31, startWeekday: 2 },
+      { name: "August", days: 31, startWeekday: 5 },
+      { name: "September", days: 30, startWeekday: 1 },
+      { name: "October", days: 31, startWeekday: 3 },
+      { name: "November", days: 30, startWeekday: 6 },
+      { name: "December", days: 31, startWeekday: 1 },
+    ];
+
+    let currentView = "year"; // "year" or "month"
+    let currentTab = "calendar";
+    let selectedDate = null;
+
+    // Format date string YYYY-MM-DD
+    function formatDate(year, month, day) {
+      const mm = (month + 1).toString().padStart(2, "0");
+      const dd = day.toString().padStart(2, "0");
+      return `${year}-${mm}-${dd}`;
+    }
+
+    // Render year calendar with months and days
+    function renderYearCalendar() {
+      calendarYearEl.innerHTML = "";
+      const now = new Date();
+      const currentMonth = now.getMonth();
+      const earningsData = window.earningsData;
+
+      months.forEach((month, mIndex) => {
+        const monthDiv = document.createElement("div");
+        monthDiv.className = "select-none";
+
+        // Highlight current month
+        if (mIndex === currentMonth) {
+          monthDiv.classList.add("current-month");
+        }
+
+        // Month title
+        const monthTitle = document.createElement("h3");
+        monthTitle.className = "text-white mb-1 text-[13px] font-normal";
+        monthTitle.textContent = month.name;
+        monthDiv.appendChild(monthTitle);
+
+        // Days container with correct weekday alignment
+        const daysContainer = document.createElement("div");
+        daysContainer.className = "flex flex-wrap gap-[2px]";
+
+        // Add empty placeholders for days before startWeekday
+        for (let i = 0; i < month.startWeekday; i++) {
+          const placeholder = document.createElement("div");
+          placeholder.className = "min-w-[16px] px-1.5 py-[2px]";
+          placeholder.style.visibility = "hidden";
+          placeholder.textContent = "0";
+          daysContainer.appendChild(placeholder);
+        }
+
+        // Add days with earnings/loss coloring and click handler
+        for (let day = 1; day <= month.days; day++) {
+          const dayDiv = document.createElement("div");
+          dayDiv.className =
+            "min-w-[16px] px-1.5 py-[2px] text-center cursor-pointer rounded-[10px] select-none";
+
+          const dateStr = formatDate(2025, mIndex, day);
+          console.log("🔎", dateStr, earningsData[dateStr]);
+
+          const earning = earningsData[dateStr];
+
+          if (earning !== undefined) {
+            if (earning > 0) {
+              dayDiv.classList.add("bg-[#00c48c]", "text-white");
+            } else if (earning < 0) {
+              dayDiv.classList.add("bg-[#ef4b4b]", "text-white");
+            } else {
+              dayDiv.classList.add("text-white");
+            }
+          } else {
+            dayDiv.classList.add("text-white");
+          }
+
+          dayDiv.textContent = day;
+          dayDiv.setAttribute("data-date", dateStr);
+
+          dayDiv.addEventListener("click", () => {
+            openEntryModal(dateStr);
+          });
+
+          daysContainer.appendChild(dayDiv);
+        }
+
+        monthDiv.appendChild(daysContainer);
+        calendarYearEl.appendChild(monthDiv);
+      });
+      
+      
+      // Scroll to current month in Year view
+setTimeout(() => {
+  const currentMonthEl = calendarYearEl.querySelector(".current-month");
+  if (currentMonthEl) {
+    currentMonthEl.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+}, 100);
+
+    }
+
+    // Render month calendar with all months stacked vertically (scrollable)
+    function renderMonthCalendar() {
+      calendarMonthEl.innerHTML = "";
+      const now = new Date();
+      const currentMonth = now.getMonth();
+      const earningsData = window.earningsData;
+
+
+      months.forEach((month, mIndex) => {
+        const monthSection = document.createElement("section");
+        monthSection.className = "select-none";
+
+        // Highlight current month container
+        if (mIndex === currentMonth) {
+          monthSection.classList.add("current-month");
+        }
+
+        // Month title
+        const monthTitle = document.createElement("h3");
+        monthTitle.className = "text-white mb-1 text-[13px] font-normal";
+        monthTitle.textContent = month.name;
+        monthSection.appendChild(monthTitle);
+
+        // Days of week header
+        const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+        const dowContainer = document.createElement("div");
+        dowContainer.className =
+          "grid grid-cols-7 gap-[2px] text-[10px] text-white/70 mb-1 select-none";
+        daysOfWeek.forEach((dow) => {
+          const dowDiv = document.createElement("div");
+          dowDiv.className = "text-center";
+          dowDiv.textContent = dow;
+          dowContainer.appendChild(dowDiv);
+        });
+        monthSection.appendChild(dowContainer);
+
+        // Days grid
+        const daysGrid = document.createElement("div");
+        daysGrid.className = "grid grid-cols-7 gap-[2px]";
+
+        // Empty placeholders for startWeekday
+        for (let i = 0; i < month.startWeekday; i++) {
+          const placeholder = document.createElement("div");
+          placeholder.className = "min-w-[24px] h-6";
+          daysGrid.appendChild(placeholder);
+        }
+
+        // Days with earnings/loss coloring and click handler
+        for (let day = 1; day <= month.days; day++) {
+          const dayDiv = document.createElement("div");
+          dayDiv.className =
+            "min-w-[24px] h-6 text-center cursor-pointer rounded-[10px] select-none leading-6";
+
+          const dateStr = formatDate(2025, mIndex, day);
+          const earning = earningsData[dateStr];
+
+          if (earning !== undefined) {
+            if (earning > 0) {
+              dayDiv.classList.add("bg-[#00c48c]", "text-white");
+            } else if (earning < 0) {
+              dayDiv.classList.add("bg-[#ef4b4b]", "text-white");
+            } else {
+              dayDiv.classList.add("text-white");
+            }
+          } else {
+            dayDiv.classList.add("text-white");
+          }
+
+          dayDiv.textContent = day;
+          dayDiv.setAttribute("data-date", dateStr);
+
+          dayDiv.addEventListener("click", () => {
+            openEntryModal(dateStr);
+          });
+
+          daysGrid.appendChild(dayDiv);
+        }
+
+        monthSection.appendChild(daysGrid);
+        calendarMonthEl.appendChild(monthSection);
+      });
+
+      // Scroll to current month
+      setTimeout(() => {
+        const currentMonthEl = calendarMonthEl.querySelector(".current-month");
+        if (currentMonthEl) {
+          currentMonthEl.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      }, 100);
+    }
+
+    // Open modal to enter earnings/loss for a date
+    function openEntryModal(dateStr) {
+      selectedDate = dateStr;
+      modalDateEl.textContent = dateStr;
+      entryInput.value = window.earningsData[dateStr] ?? "";
+      entryModal.classList.remove("hidden");
+      entryInput.focus();
+    }
+
+    // Close modal
+    function closeEntryModal() {
+      selectedDate = null;
+      entryModal.classList.add("hidden");
+      entryInput.value = "";
+    }
+async function saveEntryToDB(dateStr, amount) {
+  const supabase = window.supabaseClient;
+  const fid = window.currentFid;
+
+  if (!fid || !dateStr) {
+    console.warn("❗️ FID або дата не задані.");
+    return;
+  }
+
+  if (isNaN(amount)) {
+    console.warn("❗️ Значення не є числом:", amount);
+    return;
+  }
+
+  // Записуємо або оновлюємо значення — навіть якщо воно 0 чи від'ємне
+  const { error: upsertError } = await supabase
+    .from("entries")
+    .upsert({
+      fid,
+      date: dateStr,
+      amount,
+      type: "income"
+    }, { onConflict: ['fid', 'date'] });
+
+  if (upsertError) {
+    console.error("❌ Error upserting record:", upsertError);
+  } else {
+    console.log("✅ Запис збережено:", dateStr, amount);
+  }
+}
+
+    // Save entry from modal
+async function saveEntry() {
+  if (selectedDate) {
+      const earningsData = window.earningsData || {};
+if (!selectedDate) return;
+
+
+    const val = parseFloat(entryInput.value);
+    const supabase = window.supabaseClient;
+
+    if (!isNaN(val)) {
+      earningsData[selectedDate] = val;
+      await saveEntryToDB(selectedDate, val);
+    } else {
+      delete earningsData[selectedDate];
+      await supabase
+        .from("entries")
+        .delete()
+        .eq("date", selectedDate)
+        .eq("fid", window.currentFid);
+    }
+
+    updateDayColors();
+    renderStatistics();
+    closeEntryModal();
+  }
+}
+
+
+
+    // Update day colors in both views
+function updateDayColors() {
+  const earningsData = window.earningsData || {};
+
+  // Year view
+  calendarYearEl.querySelectorAll("[data-date]").forEach((div) => {
+    const dateStr = div.getAttribute("data-date");
+    const earning = earningsData[dateStr];
+    div.classList.remove("bg-[#00c48c]", "bg-[#ef4b4b]", "text-white");
+    if (earning !== undefined) {
+      if (earning > 0) {
+        div.classList.add("bg-[#00c48c]", "text-white");
+      } else if (earning < 0) {
+        div.classList.add("bg-[#ef4b4b]", "text-white");
+      } else {
+        div.classList.add("text-white");
+      }
+    } else {
+      div.classList.add("text-white");
+    }
+  });
+
+  // Month view
+  calendarMonthEl.querySelectorAll("[data-date]").forEach((div) => {
+    const dateStr = div.getAttribute("data-date");
+    const earning = earningsData[dateStr];
+    div.classList.remove("bg-[#00c48c]", "bg-[#ef4b4b]", "text-white");
+    if (earning !== undefined) {
+      if (earning > 0) {
+        div.classList.add("bg-[#00c48c]", "text-white");
+      } else if (earning < 0) {
+        div.classList.add("bg-[#ef4b4b]", "text-white");
+      } else {
+        div.classList.add("text-white");
+      }
+    } else {
+      div.classList.add("text-white");
+    }
+  });
+}
+
+
+
+    // Calculate and render income per month and year
+    function renderStatistics() {
+        const earningsData = window.earningsData || {};
+
+      incomePerMonthEl.innerHTML = "";
+      let totalYearIncome = 0;
+
+      const monthlyIncome = Array(12).fill(0);
+      for (const dateStr in earningsData) {
+        const earning = earningsData[dateStr];
+        if (typeof earning === "number") {
+          const date = new Date(dateStr);
+          if (date.getFullYear() === 2025) {
+            monthlyIncome[date.getMonth()] += earning;
+            totalYearIncome += earning;
+          }
+        }
+      }
+
+
+      const monthNames = months.map((m) => m.name);
+      monthNames.forEach((month, i) => {
+        const li = document.createElement("li");
+        li.className = "flex justify-between";
+        const monthNameSpan = document.createElement("span");
+        monthNameSpan.textContent = month;
+        const incomeSpan = document.createElement("span");
+        incomeSpan.textContent = monthlyIncome[i].toFixed(2);
+        incomeSpan.className =
+          monthlyIncome[i] >= 0 ? "text-[#00c48c]" : "text-[#ef4b4b]";
+        li.appendChild(monthNameSpan);
+        li.appendChild(incomeSpan);
+        incomePerMonthEl.appendChild(li);
+      });
+
+      incomePerYearEl.textContent = totalYearIncome.toFixed(2);
+      incomePerYearEl.className =
+        totalYearIncome >= 0 ? "text-[#00c48c]" : "text-[#ef4b4b]";
+    }
+function checkProfitMilestones() {
+  const data = window.earningsData || {};
+  const daysWithProfit = Object.entries(data).filter(([_, amount]) => amount > 0);
+  const uniqueDates = new Set(daysWithProfit.map(([date]) => date));
+
+  const now = new Date();
+  const pastWeek = new Date(now); pastWeek.setDate(now.getDate() - 6);
+  const pastMonth = new Date(now); pastMonth.setMonth(now.getMonth() - 1);
+
+  // 1 день
+  if (uniqueDates.size >= 1) document.getElementById("mint-day").disabled = false;
+  // 1 тиждень (7 днів з прибутком у останні 7 днів)
+  if ([...uniqueDates].filter(date => new Date(date) >= pastWeek).length >= 7)
+    document.getElementById("mint-week").disabled = false;
+  // 1 місяць (30 днів з прибутком у останні 30 днів)
+  if ([...uniqueDates].filter(date => new Date(date) >= pastMonth).length >= 30)
+    document.getElementById("mint-month").disabled = false;
+  // 1 рік (365 днів з прибутком)
+  if (uniqueDates.size >= 365) document.getElementById("mint-year").disabled = false;
+}
+const CONTRACT_ADDRESS = "0xYourContractAddressHere"; // 🔁 заміни на свою адресу
+const CONTRACT_ABI = [
+  {
+    "inputs": [
+      { "internalType": "uint256", "name": "tokenId", "type": "uint256" }
+    ],
+    "name": "mint",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  }
+];
+
+// Підключення функції для будь-якої кнопки
+function setupMintButton(buttonId, tokenId) {
+  const btn = document.getElementById(buttonId);
+  btn.addEventListener("click", async () => {
+    try {
+      if (!window.ethereum) {
+        alert("Please install MetaMask");
+        return;
+      }
+
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      await provider.send("eth_requestAccounts", []);
+      const signer = provider.getSigner();
+
+      const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
+
+      const tx = await contract.mint(tokenId);
+      await tx.wait();
+
+      alert("✅ NFT minted!");
+    } catch (err) {
+      console.error("Mint error:", err);
+      alert("Mint failed: " + err.message);
+    }
+  });
+}
+
+// Підключити всі кнопки
+setupMintButton("mint-day", 1);
+setupMintButton("mint-week", 2);
+setupMintButton("mint-month", 3);
+setupMintButton("mint-year", 4);
+
+    // Toggle buttons styling for month/year
+    function updateToggleButtons() {
+      if (currentView === "year") {
+        toggleYearBtn.classList.add("bg-[#00c48c]", "font-semibold");
+        toggleYearBtn.classList.remove("text-white/70", "font-normal");
+        toggleMonthBtn.classList.remove("bg-[#00c48c]", "font-semibold");
+        toggleMonthBtn.classList.add("text-white/70", "font-normal");
+      } else {
+        toggleMonthBtn.classList.add("bg-[#00c48c]", "font-semibold");
+        toggleMonthBtn.classList.remove("text-white/70", "font-normal");
+        toggleYearBtn.classList.remove("bg-[#00c48c]", "font-semibold");
+        toggleYearBtn.classList.add("text-white/70", "font-normal");
+      }
+    }
+
+    // Show/hide calendar views based on currentView
+    function updateCalendarView() {
+      if (currentView === "year") {
+        calendarYearEl.classList.remove("hidden");
+        calendarMonthEl.classList.add("hidden");
+        calendarTitleEl.textContent = "2025";
+        toggleContainer.classList.remove("hidden");
+      } else {
+        calendarYearEl.classList.add("hidden");
+        calendarMonthEl.classList.remove("hidden");
+        calendarTitleEl.textContent = "2025";
+        toggleContainer.classList.remove("hidden");
+      }
+    }
+
+    // Event listeners for toggle buttons
+    toggleMonthBtn.addEventListener("click", () => {
+      if (currentView !== "month") {
+        currentView = "month";
+        updateToggleButtons();
+        updateCalendarView();
+        renderMonthCalendar();
+        updateDayColors();
+      }
+    });
+
+    toggleYearBtn.addEventListener("click", () => {
+      if (currentView !== "year") {
+        currentView = "year";
+        updateToggleButtons();
+        updateCalendarView();
+        renderYearCalendar();
+        updateDayColors();
+      }
+    });
+
+    // Modal buttons
+    modalCancelBtn.addEventListener("click", () => {
+      closeEntryModal();
+    });
+  
+
+    modalSaveBtn.addEventListener("click", () => {
+      saveEntry();
+    });
+
+    // Close modal on outside click
+    entryModal.addEventListener("click", (e) => {
+      if (e.target === entryModal) {
+        closeEntryModal();
+      }
+    });
+
+    // Keyboard support for modal (Enter to save, Esc to cancel)
+    entryInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        saveEntry();
+      } else if (e.key === "Escape") {
+        e.preventDefault();
+        closeEntryModal();
+      }
+    });
+
+    // Bottom tabs switching
+   function updateTabs() {
+  if (currentTab === "calendar") {
+    tabCalendarBtn.classList.add("text-[#00c48c]");
+    tabCalendarBtn.classList.remove("text-white/50");
+    tabStatisticBtn.classList.remove("text-[#00c48c]");
+    tabStatisticBtn.classList.add("text-white/50");
+    tabCoachBtn.classList.remove("text-[#00c48c]");
+    tabCoachBtn.classList.add("text-white/70");
+
+    calendarScroll.classList.remove("hidden");
+    statisticsContent.classList.add("hidden");
+    toggleContainer.classList.remove("hidden");
+    document.getElementById("coach-content").classList.add("hidden"); // 👈 додано
+    updateCalendarView();
+  } else if (currentTab === "statistic") {
+    tabCalendarBtn.classList.remove("text-[#00c48c]");
+    tabCalendarBtn.classList.add("text-white/50");
+    tabStatisticBtn.classList.add("text-[#00c48c]");
+    tabStatisticBtn.classList.remove("text-white/50");
+    tabCoachBtn.classList.remove("text-[#00c48c]");
+    tabCoachBtn.classList.add("text-white/70");
+
+    calendarScroll.classList.add("hidden");
+    statisticsContent.classList.remove("hidden");
+    toggleContainer.classList.add("hidden");
+    document.getElementById("coach-content").classList.add("hidden"); // 👈 додано
+    calendarTitleEl.textContent = "Statistics";
+    renderStatistics();
+  } else if (currentTab === "coach") {
+    tabCalendarBtn.classList.remove("text-[#00c48c]");
+    tabCalendarBtn.classList.add("text-white/50");
+    tabStatisticBtn.classList.remove("text-[#00c48c]");
+    tabStatisticBtn.classList.add("text-white/50");
+    tabCoachBtn.classList.add("text-[#00c48c]");
+    tabCoachBtn.classList.remove("text-white/70");
+
+    calendarScroll.classList.add("hidden");
+    statisticsContent.classList.add("hidden");
+    toggleContainer.classList.add("hidden");
+    document.getElementById("coach-content").classList.remove("hidden"); // 👈 показуємо
+    calendarTitleEl.textContent = "Coach";
+    checkProfitMilestones();
+  }
+}
+
+
+    tabCalendarBtn.addEventListener("click", () => {
+      if (currentTab !== "calendar") {
+            document.getElementById("coach-content").classList.add("hidden"); // 👈 тут
+
+        currentTab = "calendar";
+        updateTabs();
+      }
+    });
+    tabStatisticBtn.addEventListener("click", () => {
+      if (currentTab !== "statistic") {
+            document.getElementById("coach-content").classList.add("hidden"); // 👈 тут
+
+        currentTab = "statistic";
+        updateTabs();
+      }
+    });
+    tabCoachBtn.addEventListener("click", () => {
+      if (currentTab !== "coach") {
+        currentTab = "coach";
+        updateTabs();
+      }
+    });
+
+    // Initial render
+    currentView = "year";
+    renderYearCalendar();
+    updateToggleButtons();
+    updateDayColors();
+    updateTabs();
+    
+   
+  </script>
+<!-- Підключення SDK через ESM CDN -->
+<!-- Підключення Supabase SDK через CDN -->
+<!-- Підключення Supabase -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script type="module">
+  import sdk from 'https://esm.sh/@farcaster/frame-sdk';
+
+  const SUPABASE_URL = ""; //Your Supabase URL
+  const SUPABASE_ANON_KEY = "";// Your Supabase_anon_key
+  window.earningsData = window.earningsData || {};
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  window.supabaseClient = supabase;
+
+  window.earningsData = window.earningsData || {};
+const earningsData = window.earningsData;
+
+  let currentFid = null;
+
+async function initializeApp() {
+  try {
+    const context = await sdk.context;
+    console.log("✅ Farcaster context:", context);
+
+    currentFid = context?.user?.fid ?? null;
+    window.currentFid = currentFid;
+    if (!currentFid) {
+      console.warn("⚠️ FID не отримано — можливо, ви у браузері.");
+    }
+
+    await loadEntries(); // Спочатку завантаження
+    updateDayColors();   // Потім оновлення кольорів
+    renderYearCalendar?.();  // Потім рендер
+    renderMonthCalendar?.();
+    renderStatistics?.();
+  } catch (err) {
+    console.error("❌ Error getting context:", err);
+  }
+
+  sdk.actions.ready();
+}
+
+
+async function loadEntries() {
+  try {
+    let query = supabase.from("entries").select("date, amount")
+      .gte("date", "2025-01-01")
+      .lte("date", "2025-12-31");
+
+    if (currentFid) {
+      query = query.eq("fid", currentFid);
+    }
+
+    const { data, error } = await query;
+    if (error) {
+      console.error("❌ Помилка завантаження:", error);
+      return;
+    }
+
+    window.earningsData = window.earningsData || {};
+    const earningsData = window.earningsData;
+
+    for (const row of data) {
+      if (row.date && typeof row.amount === "number") {
+        earningsData[row.date] = row.amount;
+      }
+    }
+
+    console.log("📥 earningsData заповнений:", earningsData);
+
+    // ✅ Рендер після завантаження
+    renderYearCalendar?.();
+    renderMonthCalendar?.();
+    renderStatistics?.();
+
+  } catch (err) {
+    console.error("❌ loadEntries error:", err);
+  }
+}
+
+
+  async function saveEntryToDB(dateStr, amount) {
+    if (!currentFid) {
+      console.warn("⚠️ FID не заданий — пропуск запису.");
+      return;
+    }
+
+    try {
+      const { data, error: selectError } = await supabase
+        .from("entries")
+        .select("id")
+        .eq("date", dateStr)
+        .eq("fid", currentFid)
+        .maybeSingle();
+
+      if (selectError) {
+        console.error("❌ Select error:", selectError);
+        return;
+      }
+
+      if (data) {
+        const { error: updateError } = await supabase
+          .from("entries")
+          .update({ amount })
+          .eq("id", data.id);
+        if (updateError) console.error("❌ Update error:", updateError);
+      } else {
+        const { error: insertError } = await supabase
+          .from("entries")
+          .insert({ date: dateStr, amount, fid: currentFid, type: "income" });
+        if (insertError) console.error("❌ Insert error:", insertError);
+      }
+    } catch (err) {
+      console.error("❌ saveEntryToDB error:", err);
+    }
+  }
+
+  initializeApp().then(() => {
+  if (typeof renderYearCalendar === 'function') renderYearCalendar();
+  if (typeof renderMonthCalendar === 'function') renderMonthCalendar();
+  if (typeof renderStatistics === 'function') renderStatistics();
+});
+</script>
+
+
+
+
+</body>
+</html>
